@@ -7,10 +7,12 @@ from Constant import *
 import disc as d
 import mallet as m
 import pygame
+
+
 PLAYER1_COLOR = [255, 0, 0]
-PLAYER2_COLOR = [255, 0, 0]
-MAX_TIME = -1
-MAX_GOAL = -1
+PLAYER2_COLOR = [0, 0, 255]
+PUCK_COLOR = [0, 255, 0]
+MAX_TIME = MAX_GOAL = 0
 
 cap = cv2.VideoCapture(0)
 clock = pygame.time.Clock()
@@ -21,11 +23,21 @@ screen = pygame.display.set_mode((XMAX, YMAX))
 font = pygame.font.Font("../fonts/FFF_Tusj.ttf", 60)
 bg = pygame.image.load(BG_PATH)
 
-player1 = m.Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 20, 1, PLAYER1_COLOR)
-player2 = m.Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 20, 2, PLAYER2_COLOR)
-
-disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE,DISC_FRICTION,DISC_MASS)
+player1 = player2 = disc = 0
 score = [0, 0]
+
+
+def init():
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score
+
+    player1 = m.Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
+    player2 = m.Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS, PUCK_COLOR)
+    score1 = score2 = 0
+    clock = pygame.time.Clock()
+    player2_pos = PLAYER2_START
+    player1_pos = PLAYER1_START
+    score = [0, 0]
 
 def capture(conn):
     global pos
@@ -50,7 +62,6 @@ def capture(conn):
                 temp = scale_opp([int(x), int(y)], [h, w])
                 print(temp)
                 threading.Thread(name='send', target=send(conn, temp)).start()
-
 
 def send(conn, data):
     data = pickle.dumps(data)
@@ -90,9 +101,26 @@ def recv_pos(conn):
 def connect():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', 1234))
-    threading.Thread(name='recv', target=recv_pos,kwargs=dict(conn=s)).start()
     return s
 
+def start(s):
+    threading.Thread(name='recv', target=recv_pos,kwargs=dict(conn=s)).start()
+    # capture(s)
 
-#capture(connect())
-connect()
+def main():
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR
+    conn = connect()
+    list = pickle.loads(conn.recv(1024))
+    MAX_TIME = int(list[0])
+    MAX_GOAL = int(list[1])
+    PLAYER1_COLOR = list[2:5]
+    PUCK_COLOR = list[5:8]
+    PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
+    PUCK_COLOR = [int(word) for word in PLAYER2_COLOR]
+    #todo send client color
+
+    #todo loop here is needed
+    init()
+    start(conn)
+
+main()

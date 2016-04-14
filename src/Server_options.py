@@ -2,7 +2,8 @@ import wx
 import socket
 import Server
 import threading
-import pickle
+import image_detection as web_cam
+
 class Options(wx.Frame):
     def __init__(self, parent, title):
         super(Options, self).__init__(parent, title=title, size=(400, 400))
@@ -26,9 +27,9 @@ class Options(wx.Frame):
         self.color_select_s = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 55))
         self.color_select_s.SetColour((255, 0, 0))
 
-        self.color_c_l = wx.StaticText(self.panel, -1, label="Client Color:", pos=(10, 95), name='color')
-        self.color_select_c = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 95))
-        self.color_select_c.SetColour((0, 0, 255))
+        self.color_c_l = wx.StaticText(self.panel, -1, label="Puck Color:", pos=(10, 95), name='color')
+        self.color_select_p = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 95))
+        self.color_select_p.SetColour((0, 255, 0))
 
         self.time_l = wx.StaticText(self.panel, -1, label="Time:", pos=(10, 145), name='time')
         self.time = wx.TextCtrl( self.panel, -1, pos=(100,145))
@@ -43,22 +44,25 @@ class Options(wx.Frame):
 
     def start_server_fn(self, event):
         #global PLAYER1_COLOR, PLAYER2_COLOR, MAX_TIME, MAX_GOAL
-        f = open('settings.txt', 'w')
+        f = open('settings_s.txt', 'w')
         f.write(self.time.GetLabel() + '\n')
-        f.write(self.score.GetLabel()+ '\n')
-        f.write(str(self.color_select_s.GetColour()[0])+ '\n')
-        f.write(str(self.color_select_s.GetColour()[1])+ '\n')
-        f.write(str(self.color_select_s.GetColour()[2])+ '\n')
+        f.write(self.score.GetLabel() + '\n')
+        f.write(str(self.color_select_s.GetColour()[0]) + '\n')
+        f.write(str(self.color_select_s.GetColour()[1]) + '\n')
+        f.write(str(self.color_select_s.GetColour()[2]) + '\n')
 
-        f.write(str(self.color_select_c.GetColour()[0])+ '\n')
-        f.write(str(self.color_select_c.GetColour()[1])+ '\n')
-        f.write(str(self.color_select_c.GetColour()[2])+ '\n')
+        f.write(str(self.color_select_p.GetColour()[0]) + '\n')
+        f.write(str(self.color_select_p.GetColour()[1]) + '\n')
+        f.write(str(self.color_select_p.GetColour()[2]) + '\n')
         f.close()
         threading.Thread(name='main', target=Server.main).start()
         self.Close()
 
     def webcam_fn(self, event):
-        print('webcam')
+        self.start.Disable()
+        web_cam.start()
+        self.start.Enable()
+
 app = wx.App()
 e = Options(None, title='Size')
 app.MainLoop()

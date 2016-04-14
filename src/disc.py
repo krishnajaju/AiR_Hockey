@@ -9,16 +9,17 @@ class Disc:
     friction = 0
     mass = 1
     rad = 10
-    img = ''
+    color =[0, 0, 0]
     draw_pos = [0, 0]
 
-    def __init__(self, pos, speed, ang, friction, mass):
+    def __init__(self, pos, speed, ang, friction, mass, color):
         self.pos = pos
         self.speed = speed
         self.ang = ang
         self.friction = friction
         self.mass = mass
         self.rad = 10
+        self.color = color
 
     def move(self, dt):
         if (self.speed <= 0):
@@ -35,7 +36,7 @@ class Disc:
         self.draw_pos = scale(self.pos)
 
     def draw(self, gameDisplay):
-        pygame.draw.circle(gameDisplay, (0, 255, 0), self.draw_pos, self.rad, 0)
+        pygame.draw.circle(gameDisplay, self.color, self.draw_pos, self.rad, 0)
 
     def collision(self, B):
         if self.rad + self.pos[0] + B.rad > B.pos[0] and self.pos[0] < self.rad + B.rad + B.pos[0] and \

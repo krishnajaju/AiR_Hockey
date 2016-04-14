@@ -9,30 +9,33 @@ import threading
 import cPickle as pickles
 from Constant import *
 import pickle
-score = [0, 0]
-bg = pygame.image.load(BG_PATH)
 
-player1 = 0
-player2 = 0
-disc = 0
-score1 = score2 = 0
+bg = pygame.image.load(BG_PATH)
+score = [0, 0]
+player1 = player2 = disc = score1 = score2 = 0
+
 clock = pygame.time.Clock()
 
 player2_pos = PLAYER2_START
-
 player1_pos = PLAYER1_START
-
 PLAYER1_COLOR = [255, 0, 0]
 PLAYER2_COLOR = [255, 0, 0]
+PUCK_COLOR = [255, 0, 0]
 MAX_TIME = -1
 MAX_GOAL = -1
 #load images
 def init():
-    global player2, player1, disc
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score
 
-    player1 = Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
-    player2 = Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS)
+    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
+    score1 = score2 = 0
+    clock = pygame.time.Clock()
+    player2_pos = PLAYER2_START
+    player1_pos = PLAYER1_START
+    score = [0, 0]
+
 
 def capture():
     global player1_pos
@@ -158,27 +161,30 @@ def recv_pos(conn):
         player2_pos = [pickle.loads(data)[0], pickle.loads(data)[1]]
 
 
-def connect():
+def connect(list):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 1234))
     s.listen(1)
     conn, addr = s.accept()
+    conn.send(pickle.dumps(list))
     return conn
 
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME
-    file = open('settings.txt', 'r')
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR
+    file = open('settings_s.txt', 'r')
     list = file.readlines()
     list = [word.strip() for word in list]
     MAX_TIME = int(list[0])
     MAX_GOAL = int(list[1])
     PLAYER1_COLOR = list[2:5]
-    PLAYER2_COLOR = list[5:8]
+    PUCK_COLOR = list[5:8]
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
-    PLAYER2_COLOR = [int(word) for word in PLAYER2_COLOR]
-    print(PLAYER1_COLOR)
+    PUCK_COLOR = [int(word) for word in PLAYER2_COLOR]
+    conn = connect(list)
+    #todo recv client color
+    #todo possable loop for multiple games
     init()
-    start(connect())
+    start(conn)
 #start(0)
 
