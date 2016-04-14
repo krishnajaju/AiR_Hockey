@@ -167,10 +167,12 @@ def connect():
 
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME
     file = open('settings.txt', 'r')
     list = file.readlines()
     list = [word.strip() for word in list]
+    MAX_TIME = int(list[0])
+    MAX_GOAL = int(list[1])
     PLAYER1_COLOR = list[2:5]
     PLAYER2_COLOR = list[5:8]
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
