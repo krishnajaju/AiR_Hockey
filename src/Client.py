@@ -7,6 +7,10 @@ from Constant import *
 import disc as d
 import mallet as m
 import pygame
+PLAYER1_COLOR = [255, 0, 0]
+PLAYER2_COLOR = [255, 0, 0]
+MAX_TIME = -1
+MAX_GOAL = -1
 
 cap = cv2.VideoCapture(0)
 clock = pygame.time.Clock()
@@ -17,8 +21,8 @@ screen = pygame.display.set_mode((XMAX, YMAX))
 font = pygame.font.Font("../fonts/FFF_Tusj.ttf", 60)
 bg = pygame.image.load(BG_PATH)
 
-player1 = m.Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 20, 1)
-player2 = m.Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 20, 2)
+player1 = m.Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 20, 1, PLAYER1_COLOR)
+player2 = m.Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 20, 2, PLAYER2_COLOR)
 
 disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE,DISC_FRICTION,DISC_MASS)
 score = [0, 0]

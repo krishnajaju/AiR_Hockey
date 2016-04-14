@@ -11,14 +11,16 @@ class Mallet:
     rad = 0
     img = ''
     draw_pos = [20, 20]
+    color = [0,0,0]
 
-    def __init__(self, pos, speed, ang, mass, rad, player):
+    def __init__(self, pos, speed, ang, mass, rad, player, color):
         self.pos = pos
         self.speed = speed
         self.ang = ang
         self.mass = mass
         self.rad = rad
         self.player = player
+        self.color = color
 
     def move(self, dt, pos):
         if self.collision_wall(pos) :
@@ -29,7 +31,7 @@ class Mallet:
         self.draw_pos = scale(self.pos)
 
     def draw(self, gameDisplay):
-        pygame.draw.circle(gameDisplay, (255 * (self.player-1), 0, 255 * abs(self.player-2)), self.draw_pos, self.rad, 4)
+        pygame.draw.circle(gameDisplay, self.color, self.draw_pos, self.rad, 4)
 
 
     def dist(self, B):

@@ -9,32 +9,35 @@ import threading
 import cPickle as pickles
 from Constant import *
 import pickle
-
-
 score = [0, 0]
-cap = cv2.VideoCapture(0)
-pygame.init()
-screen = pygame.display.set_mode((XMAX, YMAX))
-#load images
 bg = pygame.image.load(BG_PATH)
 
-player1 = Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1)
-player2 = Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2)
-disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS)
-font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
-
+player1 = 0
+player2 = 0
+disc = 0
+score1 = score2 = 0
 clock = pygame.time.Clock()
-score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
-
-
 
 player2_pos = PLAYER2_START
 
 player1_pos = PLAYER1_START
 
+PLAYER1_COLOR = [255, 0, 0]
+PLAYER2_COLOR = [255, 0, 0]
+MAX_TIME = -1
+MAX_GOAL = -1
+#load images
+def init():
+    global player2, player1, disc
+
+    player1 = Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS)
+
 def capture():
     global player1_pos
     h = w = 0
+    cap = cv2.VideoCapture(0)
     while True:
         _, frame = cap.read()
         # hue saturation value
@@ -90,10 +93,14 @@ def draw(screen):
 
 def start(conn):
     #threads are started
+    global player2_pos, player1_pos, score, score1, score2
+    pygame.init()
+    screen = pygame.display.set_mode((XMAX, YMAX))
+    font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
+    score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
     threading.Thread(name='Threaded camera', target=capture).start()
     threading.Thread(name='recv', target=recv_pos, kwargs=dict(conn=conn)).start()
 
-    global player2_pos, player1_pos, score, score1, score2
     #main game loop
     while True:
         pygame.event.get()
@@ -158,6 +165,18 @@ def connect():
     conn, addr = s.accept()
     return conn
 
-start(connect())
+def main():
+    #reading full settings
+    global PLAYER1_COLOR, PLAYER2_COLOR
+    file = open('settings.txt', 'r')
+    list = file.readlines()
+    list = [word.strip() for word in list]
+    PLAYER1_COLOR = list[2:5]
+    PLAYER2_COLOR = list[5:8]
+    PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
+    PLAYER2_COLOR = [int(word) for word in PLAYER2_COLOR]
+    print(PLAYER1_COLOR)
+    init()
+    start(connect())
 #start(0)
 
