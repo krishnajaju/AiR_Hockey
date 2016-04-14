@@ -1,0 +1,49 @@
+import wx
+import socket
+import Client
+import threading
+import image_detection as web_cam
+
+class Options(wx.Frame):
+    def __init__(self, parent, title):
+        super(Options, self).__init__(parent, title=title, size=(400, 400))
+        self.InitUI()
+
+    def InitUI(self):
+        self.panel = wx.Panel(self, wx.ID_ANY)
+        self.panel.SetBackgroundColour("black")
+        self.panel.SetForegroundColour("white")
+        self.start = wx.Button(self.panel, id=wx.ID_ANY, label="Start", pos=(250, 300))
+        self.Bind(wx.EVT_BUTTON, self.start_server_fn, self.start)
+        self.webcam = wx.Button(self.panel, id=wx.ID_ANY, label="Test Webcam", pos=(250, 200))
+        self.Bind(wx.EVT_BUTTON, self.webcam_fn, self.webcam)
+        self.ip = wx.StaticText(self.panel, -1, label="IP address:" , pos=(10, 20), name='ip')
+
+        self.ip_address = wx.TextCtrl(self.panel, -1, pos=(100,185))
+        self.ip_address.SetLabel('127.0.0.1')
+
+        self.color_s_l = wx.StaticText(self.panel, -1, label="Server Color:", pos=(10, 55), name='color')
+        self.color_select_s = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 55))
+        self.color_select_s.SetColour((0, 0, 255))
+
+        self.SetTitle('Server')
+        self.Centre()
+        self.Show(True)
+
+    def start_server_fn(self, event):
+        f = open('settings_c.txt', 'w')
+        f.write(str(self.color_select_s.GetColour()[0]) + '\n')
+        f.write(str(self.color_select_s.GetColour()[1]) + '\n')
+        f.write(str(self.color_select_s.GetColour()[2]) + '\n')
+        f.close()
+        threading.Thread(name='main', target=Client.main, kwargs=dict(ip=self.ip_address.GetLabel())).start()
+        self.Close()
+
+    def webcam_fn(self, event):
+        self.start.Disable()
+        web_cam.start()
+        self.start.Enable()
+
+app = wx.App()
+e = Options(None, title='Size')
+app.MainLoop()

@@ -97,8 +97,6 @@ def draw(screen):
 def start(conn):
     #threads are started
     global player2_pos, player1_pos, score, score1, score2
-    pygame.init()
-    screen = pygame.display.set_mode((XMAX, YMAX))
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
     threading.Thread(name='Threaded camera', target=capture).start()
@@ -171,18 +169,20 @@ def connect(list):
 
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen
     file = open('settings_s.txt', 'r')
-    list = file.readlines()
-    list = [word.strip() for word in list]
+    list = [word.strip() for word in file.readlines()]
     MAX_TIME = int(list[0])
     MAX_GOAL = int(list[1])
     PLAYER1_COLOR = list[2:5]
     PUCK_COLOR = list[5:8]
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
-    PUCK_COLOR = [int(word) for word in PLAYER2_COLOR]
+    PUCK_COLOR = [int(word) for word in PUCK_COLOR]
     conn = connect(list)
     #todo recv client color
+    PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
+    pygame.init()
+    screen = pygame.display.set_mode((XMAX, YMAX))
     #todo possable loop for multiple games
     init()
     start(conn)

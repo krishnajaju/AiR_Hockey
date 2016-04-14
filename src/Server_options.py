@@ -34,6 +34,7 @@ class Options(wx.Frame):
         self.time_l = wx.StaticText(self.panel, -1, label="Time:", pos=(10, 145), name='time')
         self.time = wx.TextCtrl( self.panel, -1, pos=(100,145))
         self.time.SetLabel('-1')
+
         self.score_l = wx.StaticText(self.panel, -1, label="Max Score:", pos=(10, 185), name='score')
         self.score = wx.TextCtrl(self.panel, -1, pos=(100,185))
         self.score.SetLabel('-1')
@@ -43,7 +44,6 @@ class Options(wx.Frame):
         self.Show(True)
 
     def start_server_fn(self, event):
-        #global PLAYER1_COLOR, PLAYER2_COLOR, MAX_TIME, MAX_GOAL
         f = open('settings_s.txt', 'w')
         f.write(self.time.GetLabel() + '\n')
         f.write(self.score.GetLabel() + '\n')

@@ -10,17 +10,13 @@ import pygame
 
 
 PLAYER1_COLOR = [255, 0, 0]
-PLAYER2_COLOR = [0, 0, 255]
+PLAYER2_COLOR = [0, 255, 255]
 PUCK_COLOR = [0, 255, 0]
 MAX_TIME = MAX_GOAL = 0
-
-cap = cv2.VideoCapture(0)
+screen = 0
 clock = pygame.time.Clock()
-
 pygame.init()
 screen = pygame.display.set_mode((XMAX, YMAX))
-
-font = pygame.font.Font("../fonts/FFF_Tusj.ttf", 60)
 bg = pygame.image.load(BG_PATH)
 
 player1 = player2 = disc = 0
@@ -28,8 +24,8 @@ score = [0, 0]
 
 
 def init():
-    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score
-
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, font
+    font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     player1 = m.Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
     player2 = m.Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
     disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS, PUCK_COLOR)
@@ -42,6 +38,7 @@ def init():
 def capture(conn):
     global pos
     h = w = 0
+    cap = cv2.VideoCapture(0)
     while True:
         _, frame = cap.read()
         # hue saturation value
@@ -80,7 +77,7 @@ def draw(screen):
 
 
 def recv_pos(conn):
-    global score
+    global score, screen
     while True:
         pygame.event.get()
         temp = conn.recv(99).strip()
@@ -98,18 +95,20 @@ def recv_pos(conn):
             continue
 
 
-def connect():
+def connect(ip):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('127.0.0.1', 1234))
+    s.connect((ip, 1234))
     return s
 
 def start(s):
     threading.Thread(name='recv', target=recv_pos,kwargs=dict(conn=s)).start()
     # capture(s)
 
-def main():
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR
-    conn = connect()
+def main(ip):
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen
+
+
+    conn = connect(ip)
     list = pickle.loads(conn.recv(1024))
     MAX_TIME = int(list[0])
     MAX_GOAL = int(list[1])
@@ -117,10 +116,10 @@ def main():
     PUCK_COLOR = list[5:8]
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
     PUCK_COLOR = [int(word) for word in PLAYER2_COLOR]
-    #todo send client color
-
+    file = open('settings_c.txt', 'r')
+    PLAYER2_COLOR = [int(word.strip()) for word in file.readlines()]
+    conn.send(pickle.dumps(PLAYER2_COLOR))
     #todo loop here is needed
     init()
     start(conn)
 
-main()
