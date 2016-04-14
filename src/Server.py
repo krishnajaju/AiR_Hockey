@@ -21,7 +21,7 @@ bg = pygame.image.load(BG_PATH)
 player1 = Mallet(PLAYER1_START,MALLET_SPEED,0, MALLET_MASS, 15, 1)
 player2 = Mallet(PLAYER2_START,MALLET_SPEED,0, MALLET_MASS, 15, 2)
 disc = d.Disc(DISC_START_POS,DISC_START_SPEED,DISC_START_ANGLE, DISC_FRICTION,DISC_MASS)
-font = pygame.font.Font("../fonts/FFF_Tusj.ttf", 60)
+font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
 
 clock = pygame.time.Clock()
 score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
