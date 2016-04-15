@@ -45,8 +45,8 @@ class Options(wx.Frame):
 
     def start_server_fn(self, event):
         f = open('settings_s.txt', 'w')
-        f.write(self.time.GetLabel() + '\n')
-        f.write(self.score.GetLabel() + '\n')
+        f.write(self.time.GetValue() + '\n')
+        f.write(self.score.GetValue() + '\n')
         f.write(str(self.color_select_s.GetColour()[0]) + '\n')
         f.write(str(self.color_select_s.GetColour()[1]) + '\n')
         f.write(str(self.color_select_s.GetColour()[2]) + '\n')

@@ -23,7 +23,7 @@ class Mallet:
         self.color = color
 
     def move(self, dt, pos):
-        if self.collision_wall(pos) :
+        if self.collision_wall(pos):
             return
         self.ang = math.atan2(pos[1] - self.pos[1], pos[0] - self.pos[0]) * 180 / math.pi
         self.speed = math.sqrt((self.pos[1] - pos[1])**2 + (self.pos[0] - pos[0])**2)/(dt*10)

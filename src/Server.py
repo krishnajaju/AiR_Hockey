@@ -9,7 +9,7 @@ import threading
 import cPickle as pickles
 from Constant import *
 import pickle
-
+from Chrono import Chrono
 bg = pygame.image.load(BG_PATH)
 score = [0, 0]
 player1 = player2 = disc = score1 = score2 = 0
@@ -25,8 +25,9 @@ MAX_TIME = -1
 MAX_GOAL = -1
 #load images
 def init():
-    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono
 
+    chrono = Chrono(0,0,0)
     player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
     player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
     disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
@@ -96,7 +97,7 @@ def draw(screen):
 
 def start(conn):
     #threads are started
-    global player2_pos, player1_pos, score, score1, score2
+    global player2_pos, player1_pos, score, score1, score2, font
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
     threading.Thread(name='Threaded camera', target=capture).start()
@@ -106,7 +107,15 @@ def start(conn):
     while True:
         pygame.event.get()
         dt = clock.tick(500)
+
+        chrono.add_millisecond(dt)
+        print("TIMe", chrono.get_second(), "MAXTIME", MAX_TIME)
         #score addition
+        if((score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] <> score[1])):
+            print("END time")
+            end_game()
+            break
+
         goal = disc.collision_wall()
         if goal == 2:
             score[0] += 1
@@ -138,6 +147,19 @@ def start(conn):
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()
     pygame.quit()
     quit()
+
+def end_game():
+
+    if(score[0] > score[1]):
+        end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
+    else:
+        end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
+
+    screen.blit(end_label,(XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
+    pygame.display.update()
+    pygame.time.wait(3000)
+    clock.tick(500)
+
 
 
 def send_pos(conn):

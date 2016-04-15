@@ -36,7 +36,7 @@ class Options(wx.Frame):
         f.write(str(self.color_select_s.GetColour()[1]) + '\n')
         f.write(str(self.color_select_s.GetColour()[2]) + '\n')
         f.close()
-        threading.Thread(name='main', target=Client.main, kwargs=dict(ip=self.ip_address.GetLabel())).start()
+        threading.Thread(name='main_client', target=Client.main, kwargs=dict(ip=self.ip_address.GetValue())).start()
         self.Close()
 
     def webcam_fn(self, event):
