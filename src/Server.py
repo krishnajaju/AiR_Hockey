@@ -12,7 +12,7 @@ import pickle
 from Chrono import Chrono
 bg = pygame.image.load(BG_PATH)
 score = [0, 0]
-player1 = player2 = disc = score1 = score2 = 0
+score1 = score2 = 0
 
 clock = pygame.time.Clock()
 
@@ -23,19 +23,24 @@ PLAYER2_COLOR = [255, 0, 0]
 PUCK_COLOR = [255, 0, 0]
 MAX_TIME = -1
 MAX_GOAL = -1
+
+
 #load images
 def init():
-    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono
-
-    chrono = Chrono(0,0,0)
-    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
-    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono, font
+    chrono = Chrono(0, 0, 0)
+    font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
+    disc.pos = [0, 0]
     score1 = score2 = 0
     clock = pygame.time.Clock()
-    player2_pos = PLAYER2_START
     player1_pos = PLAYER1_START
+    player2_pos = PLAYER2_START
+    player1.pos = player1_pos
+    player2.pos = player2_pos
     score = [0, 0]
+    score1 = font.render(str(score[0]), 1, (255, 255, 255))
+    score2 = font.render(str(score[1]), 1, (255, 255, 255))
+    draw(screen=screen)
 
 
 def capture():
@@ -98,7 +103,6 @@ def draw(screen):
 def start(conn):
     #threads are started
     global player2_pos, player1_pos, score, score1, score2, font
-    font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
     threading.Thread(name='Threaded camera', target=capture).start()
     threading.Thread(name='recv', target=recv_pos, kwargs=dict(conn=conn)).start()
@@ -109,48 +113,50 @@ def start(conn):
         dt = clock.tick(500)
 
         chrono.add_millisecond(dt)
-        print("TIMe", chrono.get_second(), "MAXTIME", MAX_TIME)
         #score addition
-        if((score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] <> score[1])):
-            print("END time")
+        if (score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] != score[1]):
             end_game()
             break
 
         goal = disc.collision_wall()
         if goal == 2:
-            score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
-        elif goal == 3:
             score[1] += 1
+            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            continue
+        elif goal == 3:
+            score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            continue
 
         goal = disc.collision(player1)
         if goal == 2:
-            score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
-        elif goal == 3:
             score[1] += 1
+            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            continue
+        elif goal == 3:
+            score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            continue
 
         goal = disc.collision(player2)
         if goal == 2:
-            score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
-        elif goal == 3:
             score[1] += 1
+            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            continue
+        elif goal == 3:
+            score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            continue
 
         player1.move(dt, player1_pos)
         player2.move(dt, player2_pos)
         disc.move(dt)
         threading.Thread(name='draw', target=draw, kwargs=dict(screen=screen)).start()
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()
-    pygame.quit()
-    quit()
 
 def end_game():
-
-    if(score[0] > score[1]):
+    # opposite scores ##top score 1 ##bottom score2
+    if score[0] > score[1]:
         end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
     else:
         end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
@@ -169,7 +175,6 @@ def send_pos(conn):
     try:
         conn.send(data)
     except:
-        #failed  to send
         exit()
     return
 
@@ -191,7 +196,7 @@ def connect(list):
 
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen,player1, player2,disc
     file = open('settings_s.txt', 'r')
     list = [word.strip() for word in file.readlines()]
     MAX_TIME = int(list[0])
@@ -205,8 +210,16 @@ def main():
     PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
     pygame.init()
     screen = pygame.display.set_mode((XMAX, YMAX))
+    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
+
     #todo possable loop for multiple games
-    init()
-    start(conn)
+    while(True):
+        init()
+        start(conn)
+    pygame.quit()
+    quit()
+
 #start(0)
 
