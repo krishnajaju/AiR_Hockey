@@ -18,9 +18,9 @@ clock = pygame.time.Clock()
 
 player2_pos = PLAYER2_START
 player1_pos = PLAYER1_START
-PLAYER1_COLOR = [255, 0, 0]
-PLAYER2_COLOR = [255, 0, 0]
-PUCK_COLOR = [255, 0, 0]
+PLAYER1_COLOR = red
+PLAYER2_COLOR = blue
+PUCK_COLOR = green
 MAX_TIME = -1
 MAX_GOAL = -1
 
@@ -31,15 +31,15 @@ def init():
     chrono = Chrono(0, 0, 0)
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     disc.pos = [0, 0]
+    score = [0, 0]
     score1 = score2 = 0
     clock = pygame.time.Clock()
     player1_pos = PLAYER1_START
     player2_pos = PLAYER2_START
     player1.pos = player1_pos
     player2.pos = player2_pos
-    score = [0, 0]
-    score1 = font.render(str(score[0]), 1, (255, 255, 255))
-    score2 = font.render(str(score[1]), 1, (255, 255, 255))
+    score1 = font.render(str(score[0]), 1, white)
+    score2 = font.render(str(score[1]), 1, white)
     draw(screen=screen)
 
 
@@ -71,7 +71,7 @@ def capture():
 def draw(screen):
     global score1, score2
     # draw
-    screen.fill((0, 0, 0))
+    screen.fill(black)
     screen.blit(bg, scale([-XMAX_SCALE/2 - 30, YMAX_SCALE/2 + 14]))
     screen.blit(score1, scale([-XMAX_SCALE/4, 0]))
     screen.blit(score2, scale([XMAX_SCALE/4, 0]))
@@ -103,7 +103,7 @@ def draw(screen):
 def start(conn):
     #threads are started
     global player2_pos, player1_pos, score, score1, score2, font
-    score1 = score2 = font.render(str(score[0]), 1, (255, 255, 255))
+    score1 = score2 = font.render(str(score[0]), 1, white)
     threading.Thread(name='Threaded camera', target=capture).start()
     threading.Thread(name='recv', target=recv_pos, kwargs=dict(conn=conn)).start()
 
@@ -113,6 +113,8 @@ def start(conn):
         dt = clock.tick(500)
 
         chrono.add_millisecond(dt)
+        player1.move(dt, player1_pos)
+        player2.move(dt, player2_pos)
         #score addition
         if (score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] != score[1]):
             winner = end_game()
@@ -122,29 +124,27 @@ def start(conn):
         goal = disc.collision_wall()
         if goal == 2:
             score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            score1 = font.render(str(score[0]), 1, white)
         elif goal == 3:
             score[1] += 1
-            score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            score2 = font.render(str(score[1]), 1, white)
 
         goal = disc.collision(player1)
         if goal == 2:
             score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            score1 = font.render(str(score[0]), 1, white)
         elif goal == 3:
             score[1] += 1
-            score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            score2 = font.render(str(score[1]), 1, white)
 
         goal = disc.collision(player2)
         if goal == 2:
             score[0] += 1
-            score1 = font.render(str(score[0]), 1, (255, 255, 255))
+            score1 = font.render(str(score[0]), 1, white)
         elif goal == 3:
             score[1] += 1
-            score2 = font.render(str(score[1]), 1, (255, 255, 255))
+            score2 = font.render(str(score[1]), 1, white)
 
-        player1.move(dt, player1_pos)
-        player2.move(dt, player2_pos)
         disc.move(dt)
         threading.Thread(name='draw', target=draw, kwargs=dict(screen=screen)).start()
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()

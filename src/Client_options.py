@@ -22,7 +22,7 @@ class Options(wx.Frame):
         self.ip_address = wx.TextCtrl(self.panel, -1, pos=(100, 20))
         self.ip_address.SetLabel('127.0.0.1')
 
-        self.color_s_l = wx.StaticText(self.panel, -1, label="Server Color:", pos=(10, 55), name='color')
+        self.color_s_l = wx.StaticText(self.panel, -1, label="Client Color:", pos=(10, 55), name='color')
         self.color_select_s = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 55))
         self.color_select_s.SetColour((0, 0, 255))
 

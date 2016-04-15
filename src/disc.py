@@ -67,7 +67,7 @@ class Disc:
             # bottom wall
             if - XMAX_SCALE / 2 + GOAL_WIDTH/2 < self.pos[0] < XMAX_SCALE / 2 - GOAL_WIDTH/2:
                 if self.pos[1] <= -YMAX_SCALE/2 - self.rad:
-                    self.pos = [-XMAX/2, 0] #bottom goal
+                    self.pos = [-XMAX_SCALE/2, 0] #bottom goal
                     self.speed = 0.3
                     self.ang = 330
                     return 3
@@ -81,7 +81,7 @@ class Disc:
             # top wall
             if - XMAX_SCALE / 2 + GOAL_WIDTH/2 < self.pos[0] < XMAX_SCALE / 2 - GOAL_WIDTH/2:
                 if self.pos[1] >= YMAX_SCALE/2 + self.rad:
-                    self.pos = [-XMAX/2, 0]#top goal
+                    self.pos = [-XMAX_SCALE/2, 0]#top goal
                     self.speed = 0.3
                     self.ang = 30
                     return 2
