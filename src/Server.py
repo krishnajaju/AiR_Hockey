@@ -115,38 +115,33 @@ def start(conn):
         chrono.add_millisecond(dt)
         #score addition
         if (score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] != score[1]):
-            end_game()
+            winner = end_game()
+            send_pos(conn, winner)
             break
 
         goal = disc.collision_wall()
         if goal == 2:
             score[1] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
-            continue
         elif goal == 3:
             score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
-            continue
 
         goal = disc.collision(player1)
         if goal == 2:
             score[1] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
-            continue
         elif goal == 3:
             score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
-            continue
 
         goal = disc.collision(player2)
         if goal == 2:
             score[1] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
-            continue
         elif goal == 3:
             score[0] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
-            continue
 
         player1.move(dt, player1_pos)
         player2.move(dt, player2_pos)
@@ -157,20 +152,22 @@ def start(conn):
 def end_game():
     # opposite scores ##top score 1 ##bottom score2
     if score[0] > score[1]:
+        winner = 0
         end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
     else:
+        winner = 1
         end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
 
     screen.blit(end_label,(XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
     pygame.display.update()
     pygame.time.wait(3000)
     clock.tick(500)
+    return winner
 
 
-
-def send_pos(conn):
+def send_pos(conn, winner=-1):
     global score
-    data = [player1.pos, player2.pos, disc.pos, score]
+    data = [player1.pos, player2.pos, disc.pos, score, chrono.__str__(), winner]
     data = pickles.dumps(data, -1)
     try:
         conn.send(data)
@@ -221,5 +218,4 @@ def main():
     pygame.quit()
     quit()
 
-#start(0)
 

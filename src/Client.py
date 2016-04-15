@@ -79,6 +79,18 @@ def draw(font):
     pygame.display.update()
 
 
+def end_game(winner, font):
+    # opposite scores ##top score 1 ##bottom score2
+    if winner == 0:
+        end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
+    else:
+        end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
+    screen_c.blit(end_label,(XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
+    pygame.display.update()
+    pygame.time.wait(3000)
+    clock.tick(500)
+
+
 def recv_pos(conn):
     global score, screen_c
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
@@ -86,14 +98,18 @@ def recv_pos(conn):
         # Events
         pygame.event.get()
         try:
-            temp = conn.recv(99).strip()
+            temp = conn.recv(110).strip()
             data = pickle.loads(temp)
             player1.move_to(data[0])
             player2.move_to(data[1])
             disc.move_to(data[2])
             score = data[3]
+            time = data[4]
+            if str(data[5]) != '-1':
+                end_game(data[5], font)
             threading.Thread(name='draw', target=draw, kwargs=dict(font=font)).start()
-        except Exception as e:
+        except:
+            exit()
             continue
     pygame.quit()
     quit()
@@ -101,12 +117,12 @@ def recv_pos(conn):
 def connect(ip):
     print(ip)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('192.168.0.121', 1234))
+    s.connect((ip, 1234))
     return s
 
 def start(s):
     threading.Thread(name='recv', target=recv_pos,kwargs=dict(conn=s)).start()
-    capture(s)
+#    capture(s)
 
 def main(ip):
     global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen_c

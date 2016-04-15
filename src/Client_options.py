@@ -6,20 +6,20 @@ import image_detection as web_cam
 
 class Options(wx.Frame):
     def __init__(self, parent, title):
-        super(Options, self).__init__(parent, title=title, size=(400, 400))
+        super(Options, self).__init__(parent, title=title, size=(400, 250))
         self.InitUI()
 
     def InitUI(self):
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.panel.SetBackgroundColour("black")
         self.panel.SetForegroundColour("white")
-        self.start = wx.Button(self.panel, id=wx.ID_ANY, label="Start", pos=(250, 300))
+        self.start = wx.Button(self.panel, id=wx.ID_ANY, label="Start", pos=(250, 150))
         self.Bind(wx.EVT_BUTTON, self.start_server_fn, self.start)
-        self.webcam = wx.Button(self.panel, id=wx.ID_ANY, label="Test Webcam", pos=(250, 200))
+        self.webcam = wx.Button(self.panel, id=wx.ID_ANY, label="Test Webcam", pos=(250, 100))
         self.Bind(wx.EVT_BUTTON, self.webcam_fn, self.webcam)
         self.ip = wx.StaticText(self.panel, -1, label="IP address:" , pos=(10, 20), name='ip')
 
-        self.ip_address = wx.TextCtrl(self.panel, -1, pos=(100,185))
+        self.ip_address = wx.TextCtrl(self.panel, -1, pos=(100, 20))
         self.ip_address.SetLabel('127.0.0.1')
 
         self.color_s_l = wx.StaticText(self.panel, -1, label="Server Color:", pos=(10, 55), name='color')
