@@ -121,26 +121,26 @@ def start(conn):
 
         goal = disc.collision_wall()
         if goal == 2:
-            score[1] += 1
+            score[0] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
         elif goal == 3:
-            score[0] += 1
+            score[1] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
 
         goal = disc.collision(player1)
         if goal == 2:
-            score[1] += 1
+            score[0] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
         elif goal == 3:
-            score[0] += 1
+            score[1] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
 
         goal = disc.collision(player2)
         if goal == 2:
-            score[1] += 1
+            score[0] += 1
             score1 = font.render(str(score[0]), 1, (255, 255, 255))
         elif goal == 3:
-            score[0] += 1
+            score[1] += 1
             score2 = font.render(str(score[1]), 1, (255, 255, 255))
 
         player1.move(dt, player1_pos)

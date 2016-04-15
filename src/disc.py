@@ -69,7 +69,7 @@ class Disc:
                 if self.pos[1] <= -YMAX_SCALE/2 - self.rad:
                     self.pos = [-XMAX/2, 0] #bottom goal
                     self.speed = 0.3
-                    self.ang = 30
+                    self.ang = 330
                     return 3
                 else:
                     return 0
@@ -83,7 +83,7 @@ class Disc:
                 if self.pos[1] >= YMAX_SCALE/2 + self.rad:
                     self.pos = [-XMAX/2, 0]#top goal
                     self.speed = 0.3
-                    self.ang = 330
+                    self.ang = 30
                     return 2
                 else:
                     return 0

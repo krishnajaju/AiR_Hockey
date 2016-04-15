@@ -26,7 +26,7 @@ class Options(wx.Frame):
         self.color_select_s = wx.ColourPickerCtrl(self.panel, id=wx.ID_ANY, pos=(100, 55))
         self.color_select_s.SetColour((0, 0, 255))
 
-        self.SetTitle('Server')
+        self.SetTitle('Client')
         self.Centre()
         self.Show(True)
 
