@@ -25,6 +25,11 @@ class Mallet:
     def move(self, dt, pos):
         if self.collision_wall(pos):
             return
+        if self.player == 1 and pos[1] <= 0:
+            pos[1] = +self.rad
+        elif self.player == 2 and pos[1] >= 0:
+            pos[1] = -self.rad
+
         self.ang = math.atan2(pos[1] - self.pos[1], pos[0] - self.pos[0]) * 180 / math.pi
         self.speed = math.sqrt((self.pos[1] - pos[1])**2 + (self.pos[0] - pos[0])**2)/(dt*10)
         self.pos = [self.pos[0] + dt *self.speed * math.cos(self.ang/57.2958), self.pos[1] + dt *self.speed * math.sin(self.ang/57.2958)]

@@ -69,7 +69,6 @@ def draw(font):
     screen_c.fill((0, 0, 0))
     screen_c.blit(bg, scale([-XMAX_SCALE/2 - 28, YMAX_SCALE/2 + 14]))
     disc.draw(screen_c)
-    print(score)
     score1 = font.render(str(score[0]), 1, white)
     score2 = font.render(str(score[1]), 1, white)
     screen_c.blit(score1, scale([-XMAX_SCALE / 4 - XMAX_SCALE / 16, -YMAX_SCALE / 26]))
@@ -114,7 +113,6 @@ def recv_pos(conn):
     quit()
 
 def connect(ip):
-    print(ip)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((ip, 1234))
     return s
@@ -140,3 +138,4 @@ def main(ip):
     init()
     #threading.Thread(name='draw', target=start, kwargs=dict(s=conn)).start()
     start(conn)
+main('127.0.0.1')

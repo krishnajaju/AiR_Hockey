@@ -146,7 +146,6 @@ def start(conn):
             score[1] += 1
             score2 = font.render(str(score[1]), 1, white)
 
-        print(score)
         disc.move(dt)
         threading.Thread(name='draw', target=draw, kwargs=dict(screen=screen)).start()
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()
