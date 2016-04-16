@@ -144,5 +144,7 @@ def main(ip):
     conn.send(pickle.dumps(PLAYER2_COLOR))
     pygame.init()
     screen_c = pygame.display.set_mode((XMAX, YMAX))
+    pygame.display.set_caption("Client")
+    pygame.display.set_icon(pygame.image.load(ICON))
     init()
     start(conn)

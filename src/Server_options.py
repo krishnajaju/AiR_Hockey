@@ -45,6 +45,12 @@ class Options(wx.Frame):
 
     def start_server_fn(self, event):
         f = open('settings_s.txt', 'w')
+        try:
+            int(self.time.GetValue())
+            int(self.score.GetValue())
+        except:
+            msgbox = wx.MessageBox('End time and score should be numbers', 'Alert', wx.ICON_EXCLAMATION | wx.STAY_ON_TOP)
+            return
         f.write(self.time.GetValue() + '\n')
         f.write(self.score.GetValue() + '\n')
         f.write(str(self.color_select_s.GetColour()[0]) + '\n')
@@ -63,6 +69,7 @@ class Options(wx.Frame):
         web_cam.start()
         self.start.Enable()
 
-app = wx.App()
-e = Options(None, title='Size')
-app.MainLoop()
+def start():
+    app = wx.App()
+    e = Options(None, title='Size')
+    app.MainLoop()

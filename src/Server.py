@@ -26,14 +26,16 @@ MAX_GOAL = -1
 
 
 #load images
-def init():
+def init(screen):
     global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono, font, font_small
     chrono = Chrono(0, 0, 0)
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     font_small = pygame.font.Font("../fonts/scoreboard.ttf", 30)
-    disc.pos = [0, 0]
+    disc.pos = DISC_START_POS
+    disc.speed = DISC_START_SPEED
+    disc.ang = DISC_START_ANGLE
     score = [0, 0]
-    score1 = score2 = 0
+    score1 = score2 == font.render('0', 1, white)
     clock = pygame.time.Clock()
     player1_pos = PLAYER1_START
     player2_pos = PLAYER2_START
@@ -103,7 +105,7 @@ def draw(screen):
     pygame.display.update()
 
 
-def start(conn):
+def start(conn, screen):
     #threads are started
     global player2_pos, player1_pos, score, score1, score2, font
     score1 = score2 = font.render(str(score[0]), 1, white)
@@ -120,10 +122,11 @@ def start(conn):
         player2.move(dt, player2_pos)
 
         if (score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] != score[1]):
-            winner = end_game()
+            winner = end_game(screen)
             send_pos(conn, winner)
+            pygame.time.wait(3000)
+            clock.tick(500)
             break
-
         #score addition
         goal = disc.collision_wall()
         if goal == 2:
@@ -153,19 +156,18 @@ def start(conn):
         threading.Thread(name='draw', target=draw, kwargs=dict(screen=screen)).start()
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()
 
-def end_game():
+
+def end_game(screen):
     # opposite scores ##top score 1 ##bottom score2
-    if score[0] > score[1]:
+    if score[0] < score[1]:
         winner = 0
         end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
     else:
         winner = 1
         end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
 
-    screen.blit(end_label,(XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
+    screen.blit(end_label, (XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
     pygame.display.update()
-    pygame.time.wait(3000)
-    clock.tick(500)
     return winner
 
 
@@ -195,9 +197,25 @@ def connect(list):
     conn.send(pickle.dumps(list))
     return conn
 
+
+def wait():
+    global player1, player2, disc
+    pygame.init()
+    screen = pygame.display.set_mode((XMAX, YMAX))
+    pygame.display.set_caption("Server")
+    pygame.display.set_icon(pygame.image.load(ICON))
+    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
+    init(screen)
+    screen.blit(font_small.render('Waiting for Client', 1, white), scale((-XMAX_SCALE / 3, YMAX_SCALE / 4)))
+    pygame.display.update()
+    return screen
+
+
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen,player1, player2,disc
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, player1, player2, disc
     file = open('settings_s.txt', 'r')
     list = [word.strip() for word in file.readlines()]
     MAX_TIME = int(list[0])
@@ -206,19 +224,13 @@ def main():
     PUCK_COLOR = list[5:8]
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
     PUCK_COLOR = [int(word) for word in PUCK_COLOR]
+    screen = wait()
+    # establishing a connection
     conn = connect(list)
-    #todo recv client color
-    PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
-    pygame.init()
-    screen = pygame.display.set_mode((XMAX, YMAX))
-    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
-    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
-
-    #todo possable loop for multiple games
+    player2.color = PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
     while(True):
-        init()
-        start(conn)
+        init(screen)
+        start(conn, screen)
     pygame.quit()
     quit()
 
