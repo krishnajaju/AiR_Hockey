@@ -13,7 +13,7 @@ import pickle
 screen_c = 0
 bg = pygame.image.load(BG_PATH)
 score = [0, 0]
-player1 = player2 = disc = score1 = score2 = 0
+#player1 = player2 = disc = 0
 clock = pygame.time.Clock()
 pygame.init()
 screen_c = pygame.display.set_mode((XMAX, YMAX))
@@ -27,12 +27,11 @@ MAX_TIME = -1
 MAX_GOAL = -1
 
 def init():
-    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, screen_c
+    global player2, player1, disc, clock, player2_pos, player1_pos, score, screen_c
 
-    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
-    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
-    score1 = score2 = 0
+    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
     clock = pygame.time.Clock()
     player2_pos = PLAYER2_START
     player1_pos = PLAYER1_START
@@ -73,8 +72,8 @@ def draw(font):
     print(score)
     score1 = font.render(str(score[0]), 1, white)
     score2 = font.render(str(score[1]), 1, white)
-    screen_c.blit(score1, scale([-XMAX_SCALE / 4, 0]))
-    screen_c.blit(score2, scale([XMAX_SCALE / 4, 0]))
+    screen_c.blit(score1, scale([-XMAX_SCALE / 4 - XMAX_SCALE / 16, -YMAX_SCALE / 26]))
+    screen_c.blit(score2, scale([XMAX_SCALE / 4, YMAX_SCALE / 8]))
     player1.draw(screen_c)
     player2.draw(screen_c)
     pygame.display.update()
@@ -110,7 +109,6 @@ def recv_pos(conn):
                 end_game(data[5], font)
             threading.Thread(name='draw', target=draw, kwargs=dict(font=font)).start()
         except:
-            exit()
             continue
     pygame.quit()
     quit()
@@ -140,5 +138,5 @@ def main(ip):
     conn.send(pickle.dumps(PLAYER2_COLOR))
     #todo loop here is needed
     init()
-    threading.Thread(name='draw', target=start, kwargs=dict(s=conn)).start()
-
+    #threading.Thread(name='draw', target=start, kwargs=dict(s=conn)).start()
+    start(conn)

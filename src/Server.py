@@ -73,8 +73,8 @@ def draw(screen):
     # draw
     screen.fill(black)
     screen.blit(bg, scale([-XMAX_SCALE/2 - 30, YMAX_SCALE/2 + 14]))
-    screen.blit(score1, scale([-XMAX_SCALE/4, 0]))
-    screen.blit(score2, scale([XMAX_SCALE/4, 0]))
+    screen.blit(score1, scale([-XMAX_SCALE/4 - XMAX_SCALE/16, -YMAX_SCALE/26]))
+    screen.blit(score2, scale([XMAX_SCALE/4, YMAX_SCALE/8]))
     player1.draw(screen)
     player2.draw(screen)
     disc.draw(screen)
@@ -111,16 +111,17 @@ def start(conn):
     while True:
         pygame.event.get()
         dt = clock.tick(500)
-
         chrono.add_millisecond(dt)
+
         player1.move(dt, player1_pos)
         player2.move(dt, player2_pos)
-        #score addition
+
         if (score[0] == MAX_GOAL or score[1] == MAX_GOAL) or (MAX_TIME != -1 and chrono.get_minute() >= MAX_TIME and score[0] != score[1]):
             winner = end_game()
             send_pos(conn, winner)
             break
 
+        #score addition
         goal = disc.collision_wall()
         if goal == 2:
             score[0] += 1
@@ -145,6 +146,7 @@ def start(conn):
             score[1] += 1
             score2 = font.render(str(score[1]), 1, white)
 
+        print(score)
         disc.move(dt)
         threading.Thread(name='draw', target=draw, kwargs=dict(screen=screen)).start()
         threading.Thread(name='send', target=send_pos, kwargs=dict(conn=conn)).start()
@@ -207,9 +209,9 @@ def main():
     PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
     pygame.init()
     screen = pygame.display.set_mode((XMAX, YMAX))
-    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, 15, 1, PLAYER1_COLOR)
-    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, 15, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, PUCK_COLOR)
+    player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
+    player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
+    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
 
     #todo possable loop for multiple games
     while(True):

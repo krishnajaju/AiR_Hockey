@@ -12,13 +12,13 @@ class Disc:
     color =[0, 0, 0]
     draw_pos = [0, 0]
 
-    def __init__(self, pos, speed, ang, friction, mass, color):
+    def __init__(self, pos, speed, ang, friction, mass, rad, color):
         self.pos = pos
         self.speed = speed
         self.ang = ang
         self.friction = friction
         self.mass = mass
-        self.rad = 10
+        self.rad = rad
         self.color = color
 
     def move(self, dt):
