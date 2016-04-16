@@ -37,7 +37,7 @@ class Options(wx.Frame):
 
         self.score_l = wx.StaticText(self.panel, -1, label="Max Score:", pos=(10, 185), name='score')
         self.score = wx.TextCtrl(self.panel, -1, pos=(100,185))
-        self.score.SetLabel('-1')
+        self.score.SetLabel('10')
 
         self.SetTitle('Server')
         self.Centre()
@@ -47,9 +47,16 @@ class Options(wx.Frame):
         f = open('settings_s.txt', 'w')
         try:
             int(self.time.GetValue())
+        except:
+            self.time.SetValue('-1')
+            msgbox = wx.MessageBox('End time should be number', 'Alert', wx.ICON_EXCLAMATION | wx.STAY_ON_TOP)
+            return
+        try:
             int(self.score.GetValue())
         except:
-            msgbox = wx.MessageBox('End time and score should be numbers', 'Alert', wx.ICON_EXCLAMATION | wx.STAY_ON_TOP)
+            self.score.SetValue('10')
+            msgbox = wx.MessageBox('End score should be number', 'Alert',
+                                   wx.ICON_EXCLAMATION | wx.STAY_ON_TOP)
             return
         f.write(self.time.GetValue() + '\n')
         f.write(self.score.GetValue() + '\n')

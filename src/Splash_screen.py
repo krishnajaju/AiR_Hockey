@@ -37,7 +37,7 @@ while True:
         screen.blit(c, (338, 0))
         screen.blit(client_text, (550, 50))
     else:
-        screen.blit(s, (0, 0))
+        screen.blit(s, (-1, -1))
         screen.blit(server_text, (10, 50))
 
     screen.blit(main_text, (190, 0))
