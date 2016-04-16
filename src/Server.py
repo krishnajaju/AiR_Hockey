@@ -27,9 +27,10 @@ MAX_GOAL = -1
 
 #load images
 def init():
-    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono, font
+    global player2, player1, disc, score1, score2, clock, player2_pos, player1_pos, score, chrono, font, font_small
     chrono = Chrono(0, 0, 0)
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
+    font_small = pygame.font.Font("../fonts/scoreboard.ttf", 30)
     disc.pos = [0, 0]
     score = [0, 0]
     score1 = score2 = 0
@@ -69,12 +70,14 @@ def capture():
 
 
 def draw(screen):
-    global score1, score2
+    global score1, score2, font, font_small
     # draw
     screen.fill(black)
     screen.blit(bg, scale([-XMAX_SCALE/2 - 30, YMAX_SCALE/2 + 14]))
     screen.blit(score1, scale([-XMAX_SCALE/4 - XMAX_SCALE/16, -YMAX_SCALE/26]))
     screen.blit(score2, scale([XMAX_SCALE/4, YMAX_SCALE/8]))
+    time = font_small.render(chrono.__str__(), 1, white)
+    screen.blit(time, scale([-XMAX_SCALE/12, YMAX_SCALE/46]))
     player1.draw(screen)
     player2.draw(screen)
     disc.draw(screen)

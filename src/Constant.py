@@ -22,8 +22,11 @@ FPS = 60
 
 RESOURCES = '..\\res\\'
 BG_PATH = RESOURCES + 'bg.png'
-SERVER_SS = RESOURCES + 's.png'
-CLIENT_SS = RESOURCES + 'c.png'
+SERVER_SS = RESOURCES + 's_r.jpg'
+CLIENT_SS = RESOURCES + 'c_r.jpg'
+SS = RESOURCES + 'sbw.png'
+
+
 
 #mallet
 MALLET_SPEED=0.05
