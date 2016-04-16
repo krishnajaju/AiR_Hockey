@@ -13,9 +13,9 @@ class Options(wx.Frame):
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.panel.SetBackgroundColour("black")
         self.panel.SetForegroundColour("white")
-        self.start = wx.Button(self.panel, id=wx.ID_ANY, label="Start", pos=(250, 200))
+        self.start = wx.Button(self.panel, id=wx.ID_ANY, label="Start", pos=(250, 220))
         self.Bind(wx.EVT_BUTTON, self.start_server_fn, self.start)
-        self.webcam = wx.Button(self.panel, id=wx.ID_ANY, label="Test Webcam", pos=(250, 100))
+        self.webcam = wx.Button(self.panel, id=wx.ID_ANY, label="Test Webcam", pos=(250, 180))
         self.Bind(wx.EVT_BUTTON, self.webcam_fn, self.webcam)
         self.ip = wx.StaticText(self.panel, -1, label="IP address:" , pos=(10, 20), name='ip')
 
