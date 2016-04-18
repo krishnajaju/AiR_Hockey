@@ -1,3 +1,5 @@
+from pygame.constants import K_SPACE, K_ESCAPE
+
 from mallet import *
 import pygame
 import socket
@@ -10,6 +12,9 @@ import cPickle as pickles
 from Constant import *
 import pickle
 from Chrono import Chrono
+import winsound
+import sys
+
 bg = pygame.image.load(BG_PATH)
 score = [0, 0]
 score1 = score2 = 0
@@ -31,10 +36,10 @@ def init(screen):
     chrono = Chrono(0, 0, 0)
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
     font_small = pygame.font.Font("../fonts/scoreboard.ttf", 30)
-    disc.pos = DISC_START_POS
+    disc.pos = [-XMAX_SCALE/2, 0]
     disc.speed = DISC_START_SPEED
     disc.ang = DISC_START_ANGLE
-    score = [0, 0]
+    score = [1, 0]
     score1 = score2 == font.render('0', 1, white)
     clock = pygame.time.Clock()
     player1_pos = PLAYER1_START
@@ -44,7 +49,6 @@ def init(screen):
     score1 = font.render(str(score[0]), 1, white)
     score2 = font.render(str(score[1]), 1, white)
     draw(screen=screen)
-
 
 def capture():
     global player1_pos
@@ -75,7 +79,7 @@ def draw(screen):
     global score1, score2, font, font_small
     # draw
     screen.fill(black)
-    screen.blit(bg, scale([-XMAX_SCALE/2 - 30, YMAX_SCALE/2 + 14]))
+    screen.blit(bg, scale([-XMAX_SCALE/2 - 32, YMAX_SCALE/2 + 22]))
     screen.blit(score1, scale([-XMAX_SCALE/4 - XMAX_SCALE/16, -YMAX_SCALE/26]))
     screen.blit(score2, scale([XMAX_SCALE/4, YMAX_SCALE/8]))
     time = font_small.render(chrono.__str__(), 1, white)
@@ -126,7 +130,8 @@ def start(conn, screen):
             send_pos(conn, winner)
             pygame.time.wait(3000)
             clock.tick(500)
-            break
+            return
+
         #score addition
         goal = disc.collision_wall()
         if goal == 2:
@@ -162,11 +167,13 @@ def end_game(screen):
     if score[0] < score[1]:
         winner = 0
         end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
+        winsound.PlaySound(CLAP_SOUND, winsound.SND_FILENAME)
     else:
         winner = 1
         end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
+        winsound.PlaySound(BOO_SOUND, winsound.SND_FILENAME)
 
-    screen.blit(end_label, (XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
+    screen.blit(end_label, (XMAX*0.5-end_label.get_width()*0.5 + 20, YMAX*0.5))
     pygame.display.update()
     return winner
 
@@ -185,8 +192,11 @@ def send_pos(conn, winner=-1):
 def recv_pos(conn):
     global player2_pos
     while True:
-        data = conn.recv(1024)
-        player2_pos = [pickle.loads(data)[0], pickle.loads(data)[1]]
+        try:
+            data = conn.recv(1024)
+            player2_pos = [pickle.loads(data)[0], pickle.loads(data)[1]]
+        except:
+            continue
 
 
 def connect(list):
@@ -206,7 +216,7 @@ def wait():
     pygame.display.set_icon(pygame.image.load(ICON))
     player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
     player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
+    disc = d.Disc([-XMAX_SCALE/2, 0], DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
     init(screen)
     screen.blit(font_small.render('Waiting for Client', 1, white), scale((-XMAX_SCALE / 3, YMAX_SCALE / 4)))
     pygame.display.update()
@@ -228,9 +238,26 @@ def main():
     # establishing a connection
     conn = connect(list)
     player2.color = PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
-    while(True):
+    flag = True
+    while (flag):
         init(screen)
         start(conn, screen)
+        draw(screen)
+        cont_or_exit = font_small.render("Press Space to continue", 1, white)
+        screen.blit(cont_or_exit, [XMAX/4 - 30, YMAX / 4])
+        pygame.display.update()
+        while (True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    flag = False
+                    break
+            keys = pygame.key.get_pressed()
+            if keys[K_SPACE]:
+                flag = True
+                break
+            elif keys[K_ESCAPE]:
+                flag = False
+                break
     pygame.quit()
     quit()
 

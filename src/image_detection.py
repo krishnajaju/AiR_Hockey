@@ -9,7 +9,7 @@ def start():
         _, frame = cap.read()
         #hue saturation value
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_pink = np.array([10, 150, 0])
+        lower_pink = np.array([10, 150, 100])
         upper_pink = np.array([30, 255, 255])
 
         mask = cv2.inRange(hsv, lower_pink, upper_pink)
@@ -28,6 +28,7 @@ def start():
                 cv2.circle(frame, (int(x), int(y)), 1, (0, 255, 255), -1)
 
         cv2.imshow('frame', frame)
+        cv2.imshow('mask', mask)
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break

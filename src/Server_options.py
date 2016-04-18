@@ -37,7 +37,7 @@ class Options(wx.Frame):
 
         self.score_l = wx.StaticText(self.panel, -1, label="Max Score:", pos=(10, 185), name='score')
         self.score = wx.TextCtrl(self.panel, -1, pos=(100,185))
-        self.score.SetLabel('10')
+        self.score.SetLabel('2')
 
         self.SetTitle('Server')
         self.Centre()
@@ -54,7 +54,7 @@ class Options(wx.Frame):
         try:
             int(self.score.GetValue())
         except:
-            self.score.SetValue('10')
+            self.score.SetValue('2')
             msgbox = wx.MessageBox('End score should be number', 'Alert',
                                    wx.ICON_EXCLAMATION | wx.STAY_ON_TOP)
             return

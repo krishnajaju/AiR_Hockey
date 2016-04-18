@@ -9,6 +9,8 @@ import threading
 import cPickle as pickles
 from Constant import *
 import pickle
+import winsound
+
 
 time = '00:00'
 screen_c = 0
@@ -30,7 +32,7 @@ def init():
     font_small = pygame.font.Font("../fonts/scoreboard.ttf", 30)
     player1 = Mallet(PLAYER1_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 1, PLAYER1_COLOR)
     player2 = Mallet(PLAYER2_START, MALLET_SPEED, 0, MALLET_MASS, MALLET_RAD, 2, PLAYER2_COLOR)
-    disc = d.Disc(DISC_START_POS, DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
+    disc = d.Disc([-XMAX_SCALE/2, 0], DISC_START_SPEED, DISC_START_ANGLE, DISC_FRICTION, DISC_MASS, DISC_RAD, PUCK_COLOR)
     clock = pygame.time.Clock()
     player2_pos = PLAYER2_START
     player1_pos = PLAYER1_START
@@ -69,7 +71,7 @@ def send(conn, data):
 def draw():
     global time, font
     screen_c.fill((0, 0, 0))
-    screen_c.blit(bg, scale([-XMAX_SCALE/2 - 28, YMAX_SCALE/2 + 14]))
+    screen_c.blit(bg, scale([-XMAX_SCALE/2 - 32, YMAX_SCALE/2 + 22]))
     disc.draw(screen_c)
     score1 = font.render(str(score[0]), 1, white)
     score2 = font.render(str(score[1]), 1, white)
@@ -88,9 +90,13 @@ def end_game(winner):
     # opposite scores ##top score 1 ##bottom score2
     if winner == 0:
         end_label = font.render("PLAYER 1 WINS!", 1, PLAYER1_COLOR)
+        winsound.PlaySound(BOO_SOUND, winsound.SND_FILENAME)
+
     else:
         end_label = font.render("PLAYER 2 WINS!", 1, PLAYER2_COLOR)
-    screen_c.blit(end_label,(XMAX*0.5-end_label.get_width()*0.5,YMAX*0.5))
+        winsound.PlaySound(CLAP_SOUND, winsound.SND_FILENAME)
+
+    screen_c.blit(end_label, (XMAX*0.5-end_label.get_width()*0.5 + 20, YMAX*0.5))
     pygame.display.update()
     pygame.time.wait(3000)
     clock.tick(500)
@@ -102,6 +108,9 @@ def recv_pos(conn):
         pygame.event.get()
         try:
             temp = conn.recv(110).strip()
+        except:
+            break
+        try:
             data = pickle.loads(temp)
             player1.move_to(data[0])
             player2.move_to(data[1])
@@ -110,9 +119,7 @@ def recv_pos(conn):
             time = data[4]
             if str(data[5]) != '-1':
                 end_game(data[5])
-            #threading.Thread(name='draw', target=draw).start()
             draw()
-
         except:
             continue
     pygame.quit()
@@ -120,9 +127,12 @@ def recv_pos(conn):
 
 
 def connect(ip):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((ip, 1234))
-    return s
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip, 1234))
+        return s
+    except:
+        return -1
 
 
 def start(s):
@@ -132,6 +142,8 @@ def start(s):
 def main(ip):
     global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen_c
     conn = connect(ip)
+    if conn == -1:
+        return -1
     list = pickle.loads(conn.recv(1024))
     MAX_TIME = int(list[0])
     MAX_GOAL = int(list[1])

@@ -45,6 +45,7 @@ class Options(wx.Frame):
         f.close()
         threading.Thread(name='main_client', target=Client.main, kwargs=dict(ip=self.ip_address.GetValue())).start()
         self.Close()
+        self.Destroy()
 
     def webcam_fn(self, event):
         self.start.Disable()
