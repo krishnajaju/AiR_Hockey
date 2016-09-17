@@ -31,6 +31,9 @@ while True:
             else:
                 Server_options.start()
             exit()
+        if event.type == pygame.QUIT:
+            exit()
+
     screen.fill(black)
     screen.blit(bg, (0, 0))
     if pos[0] > 335:

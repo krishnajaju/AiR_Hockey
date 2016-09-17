@@ -48,9 +48,13 @@ class Options(wx.Frame):
         self.Destroy()
 
     def webcam_fn(self, event):
-        self.start.Disable()
-        web_cam.start()
-        self.start.Enable()
+ #       self.start.Disable()
+        web_cam.window()
+#        self.start.Enable()
+
+    def __del__(self):
+        wx.GetApp().ExitMainLoop()
+
 
 def start():
     app = wx.App()

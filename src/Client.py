@@ -10,7 +10,7 @@ import cPickle as pickles
 from Constant import *
 import pickle
 import winsound
-
+from ConfigParser import SafeConfigParser
 
 time = '00:00'
 screen_c = 0
@@ -25,7 +25,8 @@ PLAYER2_COLOR = [255, 0, 0]
 PUCK_COLOR = [255, 0, 0]
 MAX_TIME = -1
 MAX_GOAL = -1
-
+lower = np.array([10, 150, 0])
+upper = np.array([30, 255, 255])
 def init():
     global player2, player1, disc, clock, player2_pos, player1_pos, score, screen_c, font, font_small
     font = pygame.font.Font("../fonts/scoreboard.ttf", 60)
@@ -39,7 +40,7 @@ def init():
     score = [0, 0]
 
 def capture(conn):
-    global pos
+    global pos, lower, upper
     h = w = 0
     cap = cv2.VideoCapture(0)
     while True:
@@ -49,9 +50,8 @@ def capture(conn):
         if h == 0:
             (w, h) = hsv.shape[:2]
         cv2.flip(hsv, 1, hsv)
-        lower_pink = np.array([10, 150, 0])
-        upper_pink = np.array([30, 255, 255])
-        mask = cv2.inRange(hsv, lower_pink, upper_pink)
+
+        mask = cv2.inRange(hsv, lower, upper)
         kernal = np.ones((15, 15), np.float32) / 225
         opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernal)
         cnts = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -136,11 +136,12 @@ def connect(ip):
 
 
 def start(s):
-    #threading.Thread(name='capture', target=capture,kwargs=dict(conn=s)).start()
+    # comment the thread to make it work on only one computer
+    threading.Thread(name='capture', target=capture,kwargs=dict(conn=s)).start()
     recv_pos(s)
 
 def main(ip):
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen_c
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, screen_c, lower, upper
     conn = connect(ip)
     if conn == -1:
         return -1
@@ -153,6 +154,21 @@ def main(ip):
     PUCK_COLOR = [int(word) for word in PUCK_COLOR]
     file = open('settings_c.txt', 'r')
     PLAYER2_COLOR = [int(word.strip()) for word in file.readlines()]
+    try:
+        config = SafeConfigParser()
+        config.read('HSV_Config.ini')
+        l1 = int(config.get('Lower Bound', 'H'))
+        l2 = int(config.get('Lower Bound', 'S'))
+        l3 = int(config.get('Lower Bound', 'V'))
+        u1 = int(config.get('Upper Bound', 'H'))
+        u2 = int(config.get('Upper Bound', 'S'))
+        u3 = int(config.get('Upper Bound', 'V'))
+    except:
+        l1 = l2 = l3 = u1 = u2 = u3 = 50
+    lower = np.array([int(l1), int(l2), int(l3)])
+    upper = np.array([int(u1), int(u2), int(u3)])
+
+
     conn.send(pickle.dumps(PLAYER2_COLOR))
     pygame.init()
     screen_c = pygame.display.set_mode((XMAX, YMAX))

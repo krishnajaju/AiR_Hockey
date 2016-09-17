@@ -9,7 +9,7 @@ class Disc:
     friction = 0
     mass = 1
     rad = 10
-    color =[0, 0, 0]
+    color = [0, 0, 0]
     draw_pos = [0, 0]
 
     def __init__(self, pos, speed, ang, friction, mass, rad, color):
@@ -22,7 +22,7 @@ class Disc:
         self.color = color
 
     def move(self, dt):
-        if (self.speed <= 0):
+        if self.speed <= 0:
             self.speed = 0
         else:
             self.speed = self.speed - self.friction * dt
@@ -81,7 +81,7 @@ class Disc:
             # top wall
             if - XMAX_SCALE / 2 + GOAL_WIDTH/2 < self.pos[0] < XMAX_SCALE / 2 - GOAL_WIDTH/2:
                 if self.pos[1] >= YMAX_SCALE/2 + self.rad:
-                    self.pos = [-XMAX_SCALE/2, 0]#top goal
+                    self.pos = [-XMAX_SCALE/2, 0] #top goal
                     self.speed = 0.15
                     self.ang = 30
                     return 2

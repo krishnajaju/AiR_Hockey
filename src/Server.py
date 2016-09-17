@@ -6,19 +6,20 @@ import socket
 import disc as d
 import cv2
 import numpy as np
-import pygame
+
 import threading
 import cPickle as pickles
 from Constant import *
 import pickle
 from Chrono import Chrono
 import winsound
-import sys
+from ConfigParser import SafeConfigParser
 
 bg = pygame.image.load(BG_PATH)
 score = [0, 0]
 score1 = score2 = 0
-
+lower = np.array([10, 150, 0])
+upper = np.array([30, 255, 255])
 clock = pygame.time.Clock()
 
 player2_pos = PLAYER2_START
@@ -39,7 +40,7 @@ def init(screen):
     disc.pos = [-XMAX_SCALE/2, 0]
     disc.speed = DISC_START_SPEED
     disc.ang = DISC_START_ANGLE
-    score = [1, 0]
+    score = [0, 0]
     score1 = score2 == font.render('0', 1, white)
     clock = pygame.time.Clock()
     player1_pos = PLAYER1_START
@@ -51,7 +52,7 @@ def init(screen):
     draw(screen=screen)
 
 def capture():
-    global player1_pos
+    global player1_pos, lower, upper
     h = w = 0
     cap = cv2.VideoCapture(0)
     while True:
@@ -61,9 +62,8 @@ def capture():
         if h == 0:
             (w, h) = hsv.shape[:2]
         cv2.flip(hsv, 1, hsv)
-        lower_pink = np.array([10, 150, 0])
-        upper_pink = np.array([30, 255, 255])
-        mask = cv2.inRange(hsv, lower_pink, upper_pink)
+
+        mask = cv2.inRange(hsv, lower, upper)
         kernal = np.ones((15, 15), np.float32) / 225
         opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernal)
         cnts = cv2.findContours(opening.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -225,7 +225,7 @@ def wait():
 
 def main():
     #reading full settings
-    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, player1, player2, disc
+    global PLAYER1_COLOR, PLAYER2_COLOR, MAX_GOAL, MAX_TIME, PUCK_COLOR, player1, player2, disc, lower, upper
     file = open('settings_s.txt', 'r')
     list = [word.strip() for word in file.readlines()]
     MAX_TIME = int(list[0])
@@ -235,11 +235,24 @@ def main():
     PLAYER1_COLOR = [int(word) for word in PLAYER1_COLOR]
     PUCK_COLOR = [int(word) for word in PUCK_COLOR]
     screen = wait()
+    try:
+        config = SafeConfigParser()
+        config.read('HSV_Config.ini')
+        l1 = int(config.get('Lower Bound', 'H'))
+        l2 = int(config.get('Lower Bound', 'S'))
+        l3 = int(config.get('Lower Bound', 'V'))
+        u1 = int(config.get('Upper Bound', 'H'))
+        u2 = int(config.get('Upper Bound', 'S'))
+        u3 = int(config.get('Upper Bound', 'V'))
+    except:
+        l1 = l2 = l3 = u1 = u2 = u3 = 50
+    lower = np.array([int(l1), int(l2), int(l3)])
+    upper = np.array([int(u1), int(u2), int(u3)])
     # establishing a connection
     conn = connect(list)
     player2.color = PLAYER2_COLOR = [int(word) for word in pickle.loads(conn.recv(1024))]
     flag = True
-    while (flag):
+    while flag:
         init(screen)
         start(conn, screen)
         draw(screen)
